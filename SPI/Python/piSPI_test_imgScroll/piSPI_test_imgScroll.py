@@ -52,9 +52,8 @@ while True:
 	for x in range(width):
                 spidev.write(column[x])
                 spidev.flush()
-		time.sleep(0.001)
 		for y in range(height):
 			y3 = y * 3
 	                print "display: ", column[x][y3], column[x][y3+1], column[x][y3 + 2]
-
+		time.sleep(0.001)
 	time.sleep(0.5)
