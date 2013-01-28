@@ -28,7 +28,7 @@ class LEDStrip(object):
 	def setPixelColor(self, pixel, red, green, blue):
 		self.setPixelColor(pixel, self.color(red, green, blue))
 
-	def color(self, red, green, blue)
+	def color(self, red, green, blue):
 		return int((0x80 | red << 16) | (0x80 | blue << 8) | (0x80 | blue >> 16))
 
 	def show(self):
