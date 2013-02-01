@@ -1,0 +1,34 @@
+#ignore zips, so dummies like me stop commiting them
+*.zip
+
+#Xcode stuff
+DerivedData
+*.build
+
+#windows stuff
+*/*/bin/*.lib
+*.ilk
+*/*/obj/*
+*/*/ipch/*
+*.app
+*.exe
+*.opensdf
+*.sdf
+*.exp
+*.pdb
+*.perspectivev3
+*.pbxuser
+*.suo
+*.mode*
+*.xcworkspace
+Assimp32.dll
+FreeType-6.dll
+FreeImage.dll
+Zlib.dll
+fmodex.dll
+fmodexL.dll
+glut32.dll
+obj/*
+xcuserdata/
+
+.DS_Store

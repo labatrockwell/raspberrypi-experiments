@@ -1,0 +1,17 @@
+//THE PATH TO THE ROOT OF OUR OF PATH RELATIVE TO THIS PROJECT.
+//THIS NEEDS TO BE DEFINED BEFORE CoreOF.xcconfig IS INCLUDED
+OF_PATH = /usr/of-git
+
+//THIS HAS ALL THE HEADER AND LIBS FOR OF CORE
+#include "/usr/of-git/libs/openFrameworksCompiled/project/osx/CoreOF.xcconfig"
+
+OPEN_CV = $(OF_PATH)/addons/ofxOpenCv
+
+OF_CV = $(OF_PATH)/addons/ofxCv
+
+CV_LIB = $(OPEN_CV)/libs/opencv/lib/osx/opencv.a /opt/local/lib/libopencv_highgui.2.4.3.dylib
+CV_INC = $(OPEN_CV)/src $(OPEN_CV)/libs/opencv/include/opencv $(OPEN_CV)/libs/opencv/include $(OF_CV)/libs/ofxCv/include/ofxCv $(OF_CV)/libs/ofxCv/include
+
+
+OTHER_LDFLAGS = $(OF_CORE_LIBS) $(CV_LIB)
+HEADER_SEARCH_PATHS = $(OF_CORE_HEADERS) $(CV_INC)
