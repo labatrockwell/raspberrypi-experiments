@@ -15,13 +15,10 @@
 
 class LEDStrip(object):
 
-#	Define any runtime errors we'll need
-#	class ConfigurationError(Exception):
-
 	def __init__(self, pixels = 32, spi = None):
-		print '[__init__:LEDStrip] initializing strip with ', p_count, ' pixels.'
+		print '[__init__:LEDStrip] initializing strip with ', pixels, ' pixels.'
 
-		self.pixels_count = p_count
+		self.pixels_count = pixels
 		self.pixels = bytearray(self.pixels_count * 3 + 1)
 		self.spi = spi
 
@@ -49,8 +46,7 @@ class LEDStrip(object):
 		self.setPixelColor(pixel, self.color(red, green, blue))
 
 	def color(self, red, green, blue):
-		new_color = int((0x80 | red << 16) | (0x80 | blue << 8) | (0x80 | blue >> 16))
-		print '[color:LEDStrip] converted RGB color as integer: ', new_color
+                new_color = int((0x80 | red << 16) | (0x80 | blue << 8) | (0x80 | blue))
 		return new_color
 
 	def show(self):
