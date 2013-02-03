@@ -32,10 +32,10 @@ class LEDStrip(object):
 		self.pixels = bytearray(pixels * 3 + 1)
 
 		for i in self.pixels:
-			if i < len(old_pixels): self.pixels[i] = old_pixels[i]
+			if i < (len(old_pixels) - 1): self.pixels[i] = old_pixels[i]
 
 	def setPixelColor(self, pixel, color):
-		if pixel > len(self.pixels) or pixel < 0: 
+		if pixel > ((len(self.pixels) - 1) / 3) or pixel < 0: 
 			print "[setPixelColor:LEDStrip] pixel number not valid "
 			return
 
@@ -49,23 +49,23 @@ class LEDStrip(object):
 		self.setPixelColor(pixel, self.color(red, green, blue))
 
 	def color(self, red, green, blue):
-                new_color = int((0x80 | red << 16) | (0x80 | blue << 8) | (0x80 | blue))
+                new_color = int((0x80 | red << 16) | (0x80 | green << 8) | (0x80 | blue))
 		return new_color
 
 	def getPixelColor(self, pixel):
-		if pixel > len(self.pixels) or pixel < 0: return 
+		if pixel > (len(self.pixels) - 1) or pixel < 0: return 
 
 		pixel_loc = pixel * 3
 		return self.color(self.pixels[pixel_loc], self.pixels[pixel_loc + 1], self.pixels[pixel_loc + 2])
 
 	def getPixelColorRGB(self, pixel):
-		if pixel > len(self.pixels) or pixel < 0: return
+		if pixel > (len(self.pixels) - 1) or pixel < 0: return
 
 		pixel_loc = pixel * 3
 		return [self.pixels[pixel_loc], self.pixels[pixel_loc + 1], self.pixels[pixel_loc + 2]]
 
 	def numPixels(self):
-		return len(self.pixels)
+		return (len(self.pixels) - 1) / 3
 
 	def show(self):
 		if self.spi:
