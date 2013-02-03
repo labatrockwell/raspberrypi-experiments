@@ -15,54 +15,46 @@
 
 class LEDStrip(object):
 
-#    Define any runtime errors we'll need
-#    class ConfigurationError(Exception):
+#	Define any runtime errors we'll need
+#	class ConfigurationError(Exception):
 
-	def __init__(self, p_count = 32, spi = None):
+	def __init__(self, pixels = 32, spi = None):
+		print '[__init__:LEDStrip] initializing strip with ', p_count, ' pixels.'
+
 		self.pixels_count = p_count
 		self.pixels = bytearray(self.pixels_count * 3 + 1)
-		self.spi = {}
-		print '[__init__:LEDStrip] creating strip with: ', p_count
-		if spi:
-#			self.pixels_count = p_count
-#			self.pixels = bytearray(self.pixels_count * 3 + 1)		
-			self.spi = spi
-			print '[__init__:LEDStrip] LED Strip successuflly initialized'
-		else:
-			print '[__init__:LEDStrip] ERROR unable to initialize LED Strip'
+		self.spi = spi
+
+		if self.spi: print '[__init__:LEDStrip] LED Strip successuflly initialized.'
+		else: print '[__init__:LEDStrip] ERROR unable to initialize LED Strip.'
 
 
-	def updateLength(self, p_count):
-		print '[updateLength:LEDStrip] pixels count updated to: ', p_count
-		self.pixels_count = p_count
+	def updateLength(self, pixels):
+		print '[updateLength:LEDStrip] pixels count updated to: ', pixels
+		self.pixels_count = pixels
 		self.pixels = bytearray(pixels * 3)
 
 	def setPixelColor(self, pixel, color):
-		print '[setPixelColor:LEDStrip] updating pixel: ', pixel, " to ", color
+		if pixel > len(self.pixels) or pixel < 0: 
+			print "[setPixelColor:LEDStrip] pixel number not valid "
+			return
+
 		rgb = [hex(color >> i & 0xff) for i in (16,8,0)]
-                print '[setPixelColor:LEDStrip] RGB Vals -  r: ', rgb[0], " g: ", rgb[1], " b: ", rgb[2]
 		pixel_loc = pixel * 3
-		if (pixel_loc + 2) < (self.pixels_count * 3):
-			self.pixels[pixel_loc] = int(rgb[1], 16)
-			self.pixels[pixel_loc + 1] = int(rgb[0], 16)
-			self.pixels[pixel_loc + 2] = int(rgb[2], 16)
-			print '[setPixelColor:LEDStrip] update valid starting at pos ', pixel_loc
+		self.pixels[pixel_loc] = int(rgb[1], 16)
+		self.pixels[pixel_loc + 1] = int(rgb[0], 16)
+		self.pixels[pixel_loc + 2] = int(rgb[2], 16)
 
 	def setPixelColorRGB(self, pixel, red, green, blue):
 		self.setPixelColor(pixel, self.color(red, green, blue))
 
 	def color(self, red, green, blue):
 		new_color = int((0x80 | red << 16) | (0x80 | blue << 8) | (0x80 | blue >> 16))
-		print '[color:LEDStrip] color as int: ', new_color
+		print '[color:LEDStrip] converted RGB color as integer: ', new_color
 		return new_color
 
 	def show(self):
-		print '[show:LEDStrip] show colors'
-		self.spi.write(self.pixels)
-		self.spi.flush()
-
-		if 'write' in self.spi:
-			print '[show:LEDStrip] refreshing the led colors'
+		if self.spi:
 			self.spi.write(self.pixels)
 			self.spi.flush()
 		else:
@@ -71,8 +63,8 @@ class LEDStrip(object):
 
 
 if __name__ == "__main__":
-    print """
+	print """
 This is a library for the Adafruit RGB LED strip (with 32 leds/meter). 
 It was created for use on the Raspberry Pi. 
 """
-    
+	

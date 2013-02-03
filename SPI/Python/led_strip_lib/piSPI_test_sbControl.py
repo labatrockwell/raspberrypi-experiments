@@ -25,7 +25,7 @@ brew1 = SpaceBrew(("Pithon DATA BAR " + str(random.randint(0,2000))),server="san
 brew1.addPublisher("pub", "range")
 brew1.addSubscriber("light", "range")
 
-leds = LEDStrip(p_count=pixels, spi=spidev)
+leds = LEDStrip(pixels=pixels, spi=spidev)
 
 # Here's a simple example of a function that recieves a value.
 #def example(value):
