@@ -13,7 +13,7 @@ import random
 
 # Configurable values
 # filename  = "test.png"
-dev         = "/dev/spidev0.0"
+dev         = "/dev/spidev0.1"
 brightness  = 0.0
 rangeMax    = 1023.0
 height      = 32
