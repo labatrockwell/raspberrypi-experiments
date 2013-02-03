@@ -18,8 +18,8 @@ class LEDStrip(object):
 	def __init__(self, pixels = 32, spi = None):
 		print '[__init__:LEDStrip] initializing strip with ', pixels, ' pixels.'
 
-		self.pixels_count = pixels
-		self.pixels = bytearray(self.pixels_count * 3 + 1)
+		# self.pixels_count = pixels
+		self.pixels = bytearray(pixels * 3 + 1)
 		self.spi = spi
 
 		if self.spi: print '[__init__:LEDStrip] LED Strip successuflly initialized.'
@@ -28,8 +28,11 @@ class LEDStrip(object):
 
 	def updateLength(self, pixels):
 		print '[updateLength:LEDStrip] pixels count updated to: ', pixels
-		self.pixels_count = pixels
-		self.pixels = bytearray(pixels * 3)
+		old_pixels = self.pixels
+		self.pixels = bytearray(pixels * 3 + 1)
+
+		for i in self.pixels:
+			if i < len(old_pixels): self.pixels[i] = old_pixels[i]
 
 	def setPixelColor(self, pixel, color):
 		if pixel > len(self.pixels) or pixel < 0: 
@@ -49,13 +52,27 @@ class LEDStrip(object):
                 new_color = int((0x80 | red << 16) | (0x80 | blue << 8) | (0x80 | blue))
 		return new_color
 
+	def getPixelColor(self, pixel):
+		if pixel > len(self.pixels) or pixel < 0: return 
+
+		pixel_loc = pixel * 3
+		return self.color(self.pixels[pixel_loc], self.pixels[pixel_loc + 1], self.pixels[pixel_loc + 2])
+
+	def getPixelColorRGB(self, pixel):
+		if pixel > len(self.pixels) or pixel < 0: return
+
+		pixel_loc = pixel * 3
+		return [self.pixels[pixel_loc], self.pixels[pixel_loc + 1], self.pixels[pixel_loc + 2]]
+
+	def numPixels(self):
+		return len(self.pixels)
+
 	def show(self):
 		if self.spi:
 			self.spi.write(self.pixels)
 			self.spi.flush()
 		else:
 			print '[show:LEDStrip] ERROR unable to update leds'
-
 
 
 if __name__ == "__main__":
