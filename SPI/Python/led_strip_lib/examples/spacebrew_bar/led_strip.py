@@ -15,17 +15,19 @@
 
 class LEDStrip(object):
 
+	# constructor method for the LEDStrip class
 	def __init__(self, pixels = 32, spi = None):
 		print '[__init__:LEDStrip] initializing strip with ', pixels, ' pixels.'
 
-		# self.pixels_count = pixels
 		self.pixels = bytearray(pixels * 3 + 1)
 		self.spi = spi
 
 		if self.spi: print '[__init__:LEDStrip] LED Strip successuflly initialized.'
 		else: print '[__init__:LEDStrip] ERROR unable to initialize LED Strip.'
 
-
+	##
+	# updateLength 		Updates the length of the LED strip
+	# @param {integer} pixels 	Length of the LED strip in pixels
 	def updateLength(self, pixels):
 		print '[updateLength:LEDStrip] pixels count updated to: ', pixels
 		old_pixels = self.pixels
@@ -34,10 +36,12 @@ class LEDStrip(object):
 		for i in self.pixels:
 			if i < (len(old_pixels) - 1): self.pixels[i] = old_pixels[i]
 
+	##
+	# setPixelColor 	Sets the color of a pixel from the LED strip
+	# @param {integer} pixel 	Pixel number whose color will be updated
+	# @param {integer} color 	Integer that holds a 21-bit color value (MSB is always set to HIGH)
 	def setPixelColor(self, pixel, color):
-		if pixel > ((len(self.pixels) - 1) / 3) or pixel < 0: 
-			print "[setPixelColor:LEDStrip] pixel number not valid "
-			return
+		if (pixel > self.numPixels()) or (pixel < 0): return
 
 		rgb = [hex(color >> i & 0xff) for i in (16,8,0)]
 		pixel_loc = pixel * 3
@@ -45,28 +49,55 @@ class LEDStrip(object):
 		self.pixels[pixel_loc + 1] = int(rgb[0], 16)
 		self.pixels[pixel_loc + 2] = int(rgb[2], 16)
 
+	##
+	# setPixelColorRGB 	Sets the color of a pixel from the LED strip
+	# @param {integer} pixel 	Pixel number whose color will be updated
+	# @param {integer} red 		Integer that holds a 7-bit red color value 
+	# @param {integer} green 	Integer that holds a 7-bit green color value 
+	# @param {integer} blue 	Integer that holds a 7-bit blue color value 
 	def setPixelColorRGB(self, pixel, red, green, blue):
 		self.setPixelColor(pixel, self.color(red, green, blue))
 
+	##
+	# color 	Returns a 21-bit color value that corresponds to the RGB color
+	# @param {integer} red 		Integer that holds a 7-bit red color value 
+	# @param {integer} green 	Integer that holds a 7-bit green color value 
+	# @param {integer} blue 	Integer that holds a 7-bit blue color value 
+	# @returns {integer}		Integer that holds a 21-bit color value (MSB is always set to HIGH)
 	def color(self, red, green, blue):
-                new_color = int((0x80 | red << 16) | (0x80 | green << 8) | (0x80 | blue))
+        new_color = int((0x80 | red << 16) | (0x80 | green << 8) | (0x80 | blue))
 		return new_color
 
+	##
+	# getPixelColor 	Returns a 21-bit color value that corresponds to the specified 
+	# 					pixels RGB color
+	# @param {integer} pixel 	Pixel number whose color will be returned
+	# @returns {integer}		Integer that holds a 21-bit color value 
+	# 							(MSB is always set to HIGH)
 	def getPixelColor(self, pixel):
-		if pixel > (len(self.pixels) - 1) or pixel < 0: return 
+		if (pixel > self.numPixels()) or (pixel < 0): return
 
 		pixel_loc = pixel * 3
 		return self.color(self.pixels[pixel_loc], self.pixels[pixel_loc + 1], self.pixels[pixel_loc + 2])
 
+	##
+	# getPixelColorRGB 	Returns an array with 7-bit RGB color values that corresponds to 
+	# 					this pixel's RGB color
+	# @param {integer} pixel 	Pixel number whose color will be returned
+	# @returns {array}			Array that holds 7-bit RGB color values
 	def getPixelColorRGB(self, pixel):
-		if pixel > (len(self.pixels) - 1) or pixel < 0: return
+		if (pixel > self.numPixels()) or (pixel < 0): return
 
 		pixel_loc = pixel * 3
 		return [self.pixels[pixel_loc], self.pixels[pixel_loc + 1], self.pixels[pixel_loc + 2]]
 
+	##
+	# numPixels 	Returns the length in pixels of the LED strip
 	def numPixels(self):
-		return (len(self.pixels) - 1) / 3
+		return ( (len(self.pixels) - 1) / 3 )
 
+	##
+	# show 		Updates all pixels on the LED strip to display new colors
 	def show(self):
 		if self.spi:
 			self.spi.write(self.pixels)
@@ -77,7 +108,8 @@ class LEDStrip(object):
 
 if __name__ == "__main__":
 	print """
-This is a library for the Adafruit RGB LED strip (with 32 leds/meter). 
-It was created for use on the Raspberry Pi. 
-"""
+			This is a library for controlling the Adafruit RGB LED strip using the Raspberry Pi.
+			Library only supports hardware SPI connections (no bit-bang connections), and only 
+			works with the RGB LED String model LPD8806, with 32 leds/meter. 
+		"""
 	
