@@ -11,7 +11,7 @@ OF_CV = $(OF_PATH)/addons/ofxCv
 
 CV_LIB = $(OPEN_CV)/libs/opencv/lib/osx/opencv.a /opt/local/lib/libopencv_highgui.2.4.3.dylib
 CV_INC = $(OPEN_CV)/src $(OPEN_CV)/libs/opencv/include/opencv $(OPEN_CV)/libs/opencv/include $(OF_CV)/libs/ofxCv/include/ofxCv $(OF_CV)/libs/ofxCv/include
-
+UI_INC = $(OF_PATH)/addons/ofxUI $(OF_PATH)/addons/ofxXmlSettings/src/ $(OF_PATH)/addons/ofxXmlSettings/libs
 
 OTHER_LDFLAGS = $(OF_CORE_LIBS) $(CV_LIB)
-HEADER_SEARCH_PATHS = $(OF_CORE_HEADERS) $(CV_INC)
+HEADER_SEARCH_PATHS = $(OF_CORE_HEADERS) $(CV_INC) $(UI_INC)

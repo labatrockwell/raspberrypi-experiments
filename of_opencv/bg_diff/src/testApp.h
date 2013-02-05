@@ -1,7 +1,12 @@
 #pragma once
 
+//#define RASP_ROLLOUT
+
 #include "ofMain.h"
 #include "ofxCv.h"
+
+#include "ofxUI.h"
+
 
 class testApp : public ofBaseApp{
 
@@ -19,13 +24,28 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
+    void exit();
 
     int                         _width;
     int                         _height;
-    int                         _learnRate;
-    int                         _threshold;
+    float                       _learnRate;
+    float                       _threshold;
+    float                       _requiredPctFill;
+    ofVec2f                     _buffer;
+    bool                        _initRun;
     
-    CvMat*                      _source;
-    ofImage                     _img;
+    ofVideoGrabber              _cam;
+    ofxCv::RunningBackground    _background;
+    ofImage                     _diff;
+    ofImage                     _bgImage;
+    ofImage                     _coloredImage;
+    ofRectangle                 _coloredBounds;
+    ofRectangle                 _dragArea;
+    
+    ofxUICanvas *               _gui;
+    
+    void guiEvent(ofxUIEventArgs& e);
+    void calculateChanges();
+
     
 };
