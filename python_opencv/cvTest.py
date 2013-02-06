@@ -1,31 +1,32 @@
 #!/usr/bin/env python
 
-import cv2
+import cv
 import time
+import sys
 
-cv2.namedWindow("Win")
 
-img = cv2.imread("logo.png")
+cv.NamedWindow("Win", cv.CV_WINDOW_AUTOSIZE)
 
-cv2.imshow("Win", img)
+capture = cv.CaptureFromCAM(-1)
+
+cv.SetCaptureProperty( capture, cv.CV_CAP_PROP_FRAME_WIDTH, 240 )
+cv.SetCaptureProperty( capture, cv.CV_CAP_PROP_FRAME_HEIGHT, 135 )
+
 
 def repeat():
-	time.sleep(1)
+	global capture
+	
+	frame = cv.QueryFrame(capture)
+	cv.ShowImage("Win", frame)
+
 
 while True:
+	c = cv.WaitKey(1)
+	if( c != -1 ):
+		break
+	#time.sleep no work
+	#time.sleep(int(sys.argv[1]))
 	repeat()
-
-"""
-vc = cv2.VideoCapture(-1)
-rval, frame = vc.read()
-
-def repeat():
-	global vc
-	global frame
-
-	cv2.imshow("win", frame)
-	rval, frame = vc.read()
-
-while True:
-	repeat()	
-"""
+	
+cv.DestroyAllWindows()
+del(capture)
