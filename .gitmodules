@@ -1,0 +1,3 @@
+[submodule "python_opencv/spacebrew-python"]
+	path = python_opencv/spacebrew-python
+	url = git@github.com:labatrockwell/spacebrew-python-examples.git
