@@ -6,6 +6,7 @@ import numpy as np
 import time
 import sys
 import argparse
+import pickle
 
 from SbLink import SbLink
 
@@ -43,13 +44,27 @@ parser.add_argument('-v', '--visual',
 
 args = parser.parse_args()
 
-print args
 
 sbLink = SbLink(thresholdCutoff   = 20, 
 			    learnRate 		  = 0.1, 
 				constantMessaging = False, 
 			    percentageFill    = 0.2)
 
+def changeThresholdCutoff(x):
+	global sbLink
+	sbLink.thresholdCutoff = x
+
+def changeLearnRate(x):
+	global sbLink
+	sbLink.learnRate = float(x)/100
+
+def changeConstantMessaging(x):
+	global sbLink
+	sbLink.constantMessaging = bool(x)
+
+def changePercentageFill(x):
+	global sbLink
+	sbLink.percentageFill = float(x)/100
 
 def mouseCallback(event, x, y, flags, param):
 	global state
@@ -66,7 +81,11 @@ def mouseCallback(event, x, y, flags, param):
 			pass
 
 		state = None
-		rectangle = tempRectangle
+
+		size = abs(tempRectangle[0] - tempRectangle[2]) * abs(tempRectangle[1] - tempRectangle[3])
+		if size > 0:
+			rectangle = tempRectangle
+	
 		tempRectangle = None
 
 	elif event == cv.CV_EVENT_MOUSEMOVE:
@@ -74,6 +93,7 @@ def mouseCallback(event, x, y, flags, param):
 			tempRectangle[2] = x
 			tempRectangle[3] = y
 			
+
 
 capture = cv.CaptureFromCAM(-1)
 
@@ -88,7 +108,7 @@ accumulatorShow8u = cv.CreateImage( (WIDTH, HEIGHT), cv.IPL_DEPTH_8U, 1 )
 differenceShow8u =  cv.CreateImage( (WIDTH, HEIGHT), cv.IPL_DEPTH_8U, 1 )
 threshold8u = 	 	cv.CreateImage( (WIDTH, HEIGHT), cv.IPL_DEPTH_8U, 1 )
 
-
+lastSend = 0
 
 def clientSetup():
 	cv.NamedWindow("Camera", cv.CV_WINDOW_AUTOSIZE)
@@ -103,19 +123,36 @@ def clientSetup():
 
 	cv.SetMouseCallback("Camera", mouseCallback, None)
 
+
 def sensorSetup():
 	cv.NamedWindow("Camera", cv.CV_WINDOW_AUTOSIZE)
 	if args.visual:
 		cv.NamedWindow("Accumulator", cv.CV_WINDOW_AUTOSIZE)
 		cv.NamedWindow("Difference", cv.CV_WINDOW_AUTOSIZE)
 		cv.NamedWindow("Threshold", cv.CV_WINDOW_AUTOSIZE)
+		cv.NamedWindow("Settings", cv.CV_WINDOW_AUTOSIZE)
 
+		cv.ResizeWindow("Settings", WIDTH * 2, 50)
+
+		cv.CreateTrackbar("ThresholdCutoff", "Settings", sbLink.thresholdCutoff, 255, changeThresholdCutoff )
+		cv.CreateTrackbar("LearnRate", "Settings", int(sbLink.learnRate * 100), 100, changeLearnRate )
+		cv.CreateTrackbar("ConstantMessaging", "Settings", sbLink.constantMessaging, 1, changeConstantMessaging)
+		cv.CreateTrackbar("PercentageFill", "Settings", int(sbLink.percentageFill * 100), 100, changePercentageFill)
+
+
+		textOutput = cv.CreateImage( (WIDTH * 2, 100), cv.IPL_DEPTH_8U, 3)
+	
+		#self.thresholdCutoff = thresholdCutoff
+		#self.learnRate = learnRate
+		#self.constantMessaging = constantMessaging
+		#self.percentageFill = percentageFill
 
 	cv.MoveWindow("Camera", 		0, 			0)
 	if args.visual:
 		cv.MoveWindow("Accumulator", 	WIDTH + 10, 0)
 		cv.MoveWindow("Difference", 	0, 			HEIGHT + 50)
 		cv.MoveWindow("Threshold", 		WIDTH + 10, HEIGHT + 50)
+		cv.MoveWindow("Settings",       0,          HEIGHT * 2 + 100)
 
 	cv.SetMouseCallback("Camera", mouseCallback, None)
 
@@ -125,6 +162,7 @@ def clientRepeat():
 def sensorRepeat():
 	global accumulator
 	global sbLink
+	global lastSend
 
 
 	frame = cv.QueryFrame(capture)
@@ -158,41 +196,94 @@ def sensorRepeat():
 
 	cv.ConvertScale(accumulator32f, accumulatorShow8u)
 	cv.ConvertScale(difference32f, differenceShow8u)
-
-	# draw square
-	if tempRectangle != None:
-		pt1 = (tempRectangle[0], tempRectangle[1])
-		pt2 = (tempRectangle[2], tempRectangle[3])
-		cv.Rectangle(frame, pt1, pt2, (0,0,0), 1)
-	elif rectangle != None:
-		pt1 = (rectangle[0], rectangle[1])
-		pt2 = (rectangle[2], rectangle[3])
-		cv.Rectangle(frame, pt1, pt2, (0,0,0), 1)
 	
 	# If we have a rectangle let's do the test
 	if rectangle != None:
 		r = rectangle
 		
-		mask = np.zeros((threshold8u.width, threshold8u.height), np.uint8)
-		print (r[1],r[3], r[0],r[2])
+		# create height x width to be compatable with openCV form
+		mask = np.zeros((threshold8u.height, threshold8u.width), np.uint8)
+
+		minX = min(r[0], r[2])
+		maxX = max(r[0], r[2])
+
+		minY = min(r[1], r[3])
+		maxY = max(r[1], r[3])
+
+		print ((minX, minY), (maxX, maxY))
 		print threshold8u.width, threshold8u.height
 		print mask.shape
 		#print mask.rows, mask.cols
 
-		# switch x and y for cols
-		mask[r[1]:r[3], r[0]:r[2]] = threshold8u[r[1]:r[3], r[0]:r[2]]
+		# start on Y
+		mask[minY:maxY, minX:maxX] = threshold8u[minY:maxY, minX:maxX]
 
 		pix = abs(r[0]-r[2]) * abs(r[1] - r[3])		
 		hits = np.count_nonzero(mask)
 		
+		print "pix ", pix, ", hits ", hits
 		print "Percentage ", (float(hits) / float(pix))
 		
+
+	# draw square
+	if tempRectangle != None:
+		pt1 = (tempRectangle[0], tempRectangle[1])
+		pt2 = (tempRectangle[2], tempRectangle[3])
+		
+		cv.Rectangle(frame, pt1, pt2, (255,255,255), 3)
+		cv.Rectangle(frame, pt1, pt2, (0,0,0), 1)
+
+		cv.Rectangle(accumulatorShow8u, pt1, pt2, (255,255,255), 3)
+		cv.Rectangle(accumulatorShow8u, pt1, pt2, (0,0,0), 1)
+
+		cv.Rectangle(differenceShow8u, pt1, pt2, (255,255,255), 3)
+		cv.Rectangle(differenceShow8u, pt1, pt2, (0,0,0), 1)
+
+		cv.Rectangle(threshold8u, pt1, pt2, (255,255,255), 3)
+		cv.Rectangle(threshold8u, pt1, pt2, (0,0,0), 1)
+
+
+	elif rectangle != None:
+		pt1 = (rectangle[0], rectangle[1])
+		pt2 = (rectangle[2], rectangle[3])
+
+		cv.Rectangle(frame, pt1, pt2, (255,255,255), 3)
+		cv.Rectangle(frame, pt1, pt2, (0,0,0), 1)
+
+		cv.Rectangle(accumulatorShow8u, pt1, pt2, (255,255,255), 3)
+		cv.Rectangle(accumulatorShow8u, pt1, pt2, (0,0,0), 1)
+
+		cv.Rectangle(differenceShow8u, pt1, pt2, (255,255,255), 3)
+		cv.Rectangle(differenceShow8u, pt1, pt2, (0,0,0), 1)
+
+		cv.Rectangle(threshold8u, pt1, pt2, (255,255,255), 3)
+		cv.Rectangle(threshold8u, pt1, pt2, (0,0,0), 1)
+
 		
 	cv.ShowImage("Camera", frame)
-	cv.ShowImage("Accumulator", accumulatorShow8u)
-	cv.ShowImage("Difference", differenceShow8u)
-	cv.ShowImage("Threshold", threshold8u)
+
+	if args.visual:
+		cv.ShowImage("Accumulator", accumulatorShow8u)
+		cv.ShowImage("Difference", differenceShow8u)
+		cv.ShowImage("Threshold", threshold8u)
+
+		# update track bars, in case spacebrew made an update
+		cv.SetTrackbarPos("ThresholdCutoff", "Settings", sbLink.thresholdCutoff)
+		cv.SetTrackbarPos("LearnRate", "Settings", int(sbLink.learnRate * 100))
+		cv.SetTrackbarPos("ConstantMessaging", "Settings", sbLink.constantMessaging)
+		cv.SetTrackbarPos("PercentageFill", "Settings", int(sbLink.percentageFill * 100))
+
 	
+	if lastSend + 3 < time.mktime(time.gmtime()):
+		# update images
+		pickledFrames = pickle.dumps( (WIDTH, HEIGHT, 
+									   frame.tostring(), 
+									   accumulatorShow8u.tostring(), 
+									   differenceShow8u.tostring(), 
+									   threshold8u.tostring())  )
+		sbLink.publishFrames(pickledFrames)
+
+		lastSend = time.mktime(time.gmtime())
 
 
 clean = False

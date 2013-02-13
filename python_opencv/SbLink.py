@@ -25,16 +25,6 @@ class SbLink:
 		print "Changing percentage fill test to: ", self.ROI
 
 
-	# Always set to True.  This is more of a button than a Bool
-	def __updateRequestFrames(self, value):
-		self.requestFrames = True
-		print "Changing percentage fill test to: ", self.requestFrames
-
-	# Always set to True.  This is more of a button than a Bool
-	def __updateRequestSize(self, value):
-		self.requestSize = True
-		print "Changing percentage fill test to: ", self.requestSize
-
 	def __init__(self,
 		 	 	 thresholdCutoff = 20, 
 				 learnRate = 0.1, 
@@ -50,8 +40,6 @@ class SbLink:
 		self.percentageFill = percentageFill
 
 		self.ROI = None
-		self.requestFrames = False
-		self.requestSize = False
 
 
 		self.__brew = SpaceBrew("AreaDetector", server="localhost")
@@ -62,11 +50,7 @@ class SbLink:
 		# we publish the percentage of an area that changed
 		brew.addPublisher("PercentFill")
 		# send out a frame upon request
-		brew.addPublisher("Frame")
-		# send out the frame with ROI upon request
-		brew.addPublisher("ROIFrame")
-		# send out the frame size
-		brew.addPublisher("FrameSize")
+		brew.addPublisher("Frames")
 
 
 		############ SUBSCRIBERS
@@ -91,14 +75,6 @@ class SbLink:
 		brew.addSubscriber("setROI", "string")
 		brew.subscribe("setROI", self.__updateROI)
 
-		# Receive request for us to send out an example camera frame
-		brew.addSubscriber("requestFrames", "bool", False)
-		brew.subscribe("requestFrames", self.__updateRequestFrames)
-
-		# Receive request for us to send out camera size
-		brew.addSubscriber("requestFrameSize", "bool", False)
-		brew.subscribe("requestFrameSize", self.__updateRequestSize)
-
 		brew.start()
 
 	def stop(self):
@@ -109,8 +85,6 @@ class SbLink:
 		pass
 
 	def publishFrames(self, frames):
-		pass
+		self.__brew.publish("Frames", frames)
 
-	def publishFrameSize(self, size):
-		pass
 

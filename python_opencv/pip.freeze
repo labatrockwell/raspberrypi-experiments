@@ -1,0 +1,9 @@
+# manually made links to opencv and nimpy
+#
+# cv.py -> /opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/cv.py
+# cv2.so -> /opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/cv2.so
+# numpy -> /opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/
+#
+
+websocket-client==0.8.0
+wsgiref==0.1.2
