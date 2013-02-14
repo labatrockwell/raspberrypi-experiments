@@ -1,90 +1,95 @@
 import sys
 sys.path.append("spacebrew-python")
 from spacebrew import SpaceBrew
+import time
+
+class SbObject:
+
+	def __init__(self, name, varType, value, direction):
+		self.varType = varType
+		self.value = value
+		self.name = name
+		self.direction = direction
+		self.update = False
+
+
 
 class SbLink:
 
-	def __updateThreshold(self, value):
-		self.thresholdCutoff = int(value)
-		print "Changing threshold cutoff to: ", self.thresholdCutoff
+	def __init__(self, clientName, server="localhost"):
+		self.__objects = {}
+		self.clientName = clientName
+		self.server = server
 
-	def __updateLearnRate(self, value):
-		self.learnRate = float(value)
-		print "Changing learning rate to: ", self.learnRate
-
-	def __changeConstantUpdates(self, value):
-		self.constantMessaging = bool(value)
-		print "Changing constant update to: ", self.constantMessaging
-
-	def __updatePercentageFillTest(self, value):
-		self.percentageFill = float(value)
-		print "Changing percentage fill test to: ", self.percentageFill
-
-	def __updateROI(self, value):
-		self.ROI = value
-		print "Changing percentage fill test to: ", self.ROI
-
-
-	def __init__(self,
-		 	 	 thresholdCutoff = 20, 
-				 learnRate = 0.1, 
-				 constantMessaging = False,
-				 percentageFill = 0.2,
-				):
-
-
-		# variables IN
-		self.thresholdCutoff = thresholdCutoff
-		self.learnRate = learnRate
-		self.constantMessaging = constantMessaging
-		self.percentageFill = percentageFill
-
-		self.ROI = None
-
-
-		self.__brew = SpaceBrew("AreaDetector", server="localhost")
+	def start(self):
+		print self.clientName, self.server
+		self.__brew = SpaceBrew(self.clientName, server=self.server)
 		# just expose easier variable
 		brew = self.__brew
 
-		############ PUBLISHERS
-		# we publish the percentage of an area that changed
-		brew.addPublisher("PercentFill")
-		# send out a frame upon request
-		brew.addPublisher("Frames")
+		for key,obj in self.__objects.iteritems():
 
-
-		############ SUBSCRIBERS
-		# grayscale difference before we consider a pixel changed
-		brew.addSubscriber("setThresholdCutoff", "range", self.thresholdCutoff)
-		brew.subscribe("setThresholdCutoff", self.__updateThreshold)
-
-		# rate at which the background is learned
-		brew.addSubscriber("setBackgroundLearnRate", "string", str(self.learnRate))
-		brew.subscribe("setBackgroundLearnRate", self.__updateLearnRate)
-
-		# True default, should we constantly broadcast (True), 
-		#  or only broadcast when above percentage (False)
-		brew.addSubscriber("setConstantUpdates", "bool", self.constantMessaging)
-		brew.subscribe("setConstantUpdates", self.__changeConstantUpdates)
-
-		# If we are not constant broadcast, after what % change in box do we report
-		brew.addSubscriber("setPercentageFillTest", "string", str(self.percentageFill))
-		brew.subscribe("setPercentageFillTest", self.__updatePercentageFillTest)
-
-		# Receive the updated ROI coordinates
-		brew.addSubscriber("setROI", "string")
-		brew.subscribe("setROI", self.__updateROI)
+			if obj.direction.lower() == "dir_out":
+				brew.addPublisher(obj.name, obj.varType)
+			elif obj.direction.lower() == "dir_in":
+				brew.addSubscriber(obj.name, obj.varType)
+				brew.subscribe(obj.name, obj.setter)
+			else:
+				print "Unknown direction of " , obj.direction
 
 		brew.start()
+		# give brew time to connect
+		time.sleep(3)
+
+	def add(self, name, varType, value, direction):
+		
+		obj = SbObject(name, varType, value, direction)
+		self.__objects[name] = obj
+
+		def getter():
+			#print "calling getter on ", name
+			return self.__objects[name].value
+
+		def setter(x):
+			#print "calling setter on ", name, " and val ", x
+			self.__objects[name].value = x
+			if direction.lower() == "dir_out" and self.__brew is not None:
+				self.__brew.publish(name, x)
+			else:
+				self.__objects[name].update = True
+
+		def updateQuery():
+			#print "calling update query on ", name
+			return self.__objects[name].update
+
+		def updateMarker():
+			self.__objects[name].update = False
+
+		getter.__name__ = name
+		setter.__name__ = "set" + name[0:1].upper() + name[1:]
+		updateQuery.__name__ = name + "Refreshed"
+		updateMarker.__name__ = name + "Read"
+
+		setattr(self, getter.__name__, getter)
+		setattr(self, setter.__name__, setter)
+		setattr(self, updateQuery.__name__, updateQuery)
+		setattr(self, updateMarker.__name__, updateMarker)
+
+		obj.setter = setter
+		obj.getter = getter
+		obj.updateQuery = updateQuery
+		obj.updateMarker = updateMarker
+
+
+
+	def printAll(self):
+		for obj in self.__objects:
+			print obj.name
+			print getattr(self, obj.name)
+			print obj.value
+
 
 	def stop(self):
 		print "Stopping spacebrew link"
 		self.__brew.stop()
-
-	def publishPercentFill(self):
-		pass
-
-	def publishFrames(self, frames):
-		self.__brew.publish("Frames", frames)
-
 
