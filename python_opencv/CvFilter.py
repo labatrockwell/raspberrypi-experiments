@@ -52,11 +52,18 @@ parser.add_argument('-p', '--pixels',
 					type=int,
 					metavar=("width", "height"))
 
+parser.add_argument('-s', '--server',
+					help="Specify the spacebrew server if other than local",
+					nargs=1,
+					type=str,
+					metavar='localhost')
+
 parser.add_argument('-l', '--logging',
 					type=str,
 					help="Set the logging level",
 					choices=['DEBUG', 'WARN', 'INFO'],
-					metavar="DEBUG, WARN, INFO]")
+					metavar="DEBUG, WARN, INFO")
+
 
 args = parser.parse_args()
 
@@ -69,8 +76,10 @@ if args.logging:
 else:
 	logging.getLogger().setLevel("INFO")
 
-
-sbLink = SbLink(args.name)
+if args.server:
+	sbLink = SbLink(args.name, args.server)
+else:
+	sbLink = SbLink(args.name)
 
 
 def mouseCallback(event, x, y, flags, param):
