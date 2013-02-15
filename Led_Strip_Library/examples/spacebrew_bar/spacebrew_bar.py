@@ -6,9 +6,9 @@
 
 from struct import *
 from spacebrew import SpaceBrew 
+from LAB_Led_Strip import LEDStrip
 import RPi.GPIO as GPIO, Image, time
 import random 
-from LAB_LED_Strip_Lib import LEDStrip
 
 # Configurable values
 brightness  = 0.0 		   # current brightness state (used to determine how many leds should be on)
