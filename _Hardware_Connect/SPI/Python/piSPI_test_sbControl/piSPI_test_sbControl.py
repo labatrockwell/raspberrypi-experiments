@@ -13,12 +13,12 @@ import random
 
 # Configurable values
 # filename  = "test.png"
-dev         = "/dev/spidev0.1"
+dev		 = "/dev/spidev0.1"
 brightness  = 0.0
-rangeMax    = 1023.0
-height      = 32
+rangeMax	= 1023.0
+height	  = 32
 
-spidev    = file(dev, "wb")
+spidev	= file(dev, "wb")
 
 # 
 brew1 = SpaceBrew(("Pithon DATA BAR " + str(random.randint(0,2000))),server="sandbox.spacebrew.cc")
@@ -42,17 +42,17 @@ print "Displaying..."
 
 def updateLight(bright):
 	print "set brightness ", bright
-        print "       leds on  ", ( bright / rangeMax * height) 
+	print "	   leds on  ", ( bright / rangeMax * height) 
 
 	for y in range(height):
 		y3 = y * 3
 		newVal = 128
 		if y < ( bright / rangeMax * height):
-			newVal = 255                    
+			newVal = 255					
 
 		column[y3] = newVal
-                column[y3 + 1] = newVal
-                column[y3 + 2] = newVal
+				column[y3 + 1] = newVal
+				column[y3 + 2] = newVal
 
 	spidev.write(column)
 	spidev.flush()

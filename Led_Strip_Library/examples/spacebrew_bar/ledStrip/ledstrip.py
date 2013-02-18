@@ -70,7 +70,7 @@ class LEDStrip(object):
 	# @param {integer} blue 	Integer that holds a 7-bit blue color value 
 	# @returns {integer}		Integer that holds a 21-bit color value (MSB is always set to HIGH)
 	def color(self, red, green, blue):
-        new_color = int((0x80 | red << 16) | (0x80 | green << 8) | (0x80 | blue))
+		new_color = int((0x80 | red << 16) | (0x80 | green << 8) | (0x80 | blue))
 		return new_color
 
 	##

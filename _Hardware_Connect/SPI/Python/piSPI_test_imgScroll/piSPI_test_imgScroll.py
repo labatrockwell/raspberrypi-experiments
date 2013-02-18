@@ -8,15 +8,15 @@ import RPi.GPIO as GPIO, Image, time
  
 # Configurable values
 filename  = "test.png"
-dev       = "/dev/spidev0.0"
+dev	   = "/dev/spidev0.0"
  
 # Open SPI device, load image in RGB format and get dimensions:
-spidev    = file(dev, "wb")
+spidev	= file(dev, "wb")
 print "Loading..."
-img       = Image.open(filename).convert("RGB")
-pixels    = img.load()
-width     = img.size[0]
-height    = img.size[1]
+img	   = Image.open(filename).convert("RGB")
+pixels	= img.load()
+width	 = img.size[0]
+height	= img.size[1]
 print "%dx%d pixels" % img.size
 # To do: add resize here if image is not desired height
  
@@ -39,7 +39,7 @@ for x in range(width):
 	for y in range(height):
 		value = pixels[x, y]
 		y3 = y * 3
-		column[x][y3]     = gamma[value[1]]
+		column[x][y3]	 = gamma[value[1]]
 		column[x][y3 + 1] = gamma[value[0]]
 		column[x][y3 + 2] = gamma[value[2]]
 		
@@ -50,10 +50,10 @@ print "Displaying..."
 while True:
 	print "START IMAGE"
 	for x in range(width):
-                spidev.write(column[x])
-                spidev.flush()
+				spidev.write(column[x])
+				spidev.flush()
 		for y in range(height):
 			y3 = y * 3
-	                print "display: ", column[x][y3], column[x][y3+1], column[x][y3 + 2]
+					print "display: ", column[x][y3], column[x][y3+1], column[x][y3 + 2]
 		time.sleep(0.001)
 	time.sleep(0.5)
