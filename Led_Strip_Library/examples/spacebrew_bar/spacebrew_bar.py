@@ -8,7 +8,8 @@
 
 from spacebrewInterface import spacebrew 
 from ledStrip import ledstrip
-import RPi.GPIO as GPIO, Image, time
+import RPi.GPIO as GPIO
+import time
 import random 
 import argparse
 
@@ -86,7 +87,7 @@ def main():
 
 	# register all of the subscription channels
 	sb.addSubscriber("light", "range")
-	sb.addSubscriber("color_red", "range")
+        sb.addSubscriber("color_red", "range")
 	sb.addSubscriber("color_green", "range")
 	sb.addSubscriber("color_blue", "range")
 
@@ -98,7 +99,7 @@ def main():
 
 	# connect to spacesb
 	sb.start() 
+	print "App is running and conected to Spacsb name is ", sbName
 
 if __name__ == "__main__":
 	main()
-	print "App is running and conected to Spacsb name is ", sbName
