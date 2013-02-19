@@ -18,11 +18,12 @@ class LEDStrip(object):
 	# constructor method for the LEDStrip class
 	# @param {integer} pixels 	Length of the LED strip in pixels
 	# @param {spi} spi 			Link to spi connection
-	def __init__(self, pixels = 32, spi = None):
+	def __init__(self, pixels = 32, spi = None, debug = False):
 		print '[__init__:LEDStrip] initializing strip with ', pixels, ' pixels.'
 
+		self.debug = debug
 		self.pixels = bytearray(pixels * 3 + 1)
-		# self.pixels[self.numPixels()] = 0x80
+		self.pixels[self.numPixels()] = 0x80
 		self.spi = spi
 
 		if self.spi: print '[__init__:LEDStrip] LED Strip successuflly initialized.'
@@ -32,7 +33,7 @@ class LEDStrip(object):
 	# updateLength 		Updates the length of the LED strip
 	# @param {integer} pixels 	Length of the LED strip in pixels
 	def updateLength(self, pixels):
-		print '[updateLength:LEDStrip] pixels count updated to: ', pixels
+		if self.debug: print '[updateLength:LEDStrip] pixels count updated to: ', pixels
 		old_pixels = self.pixels
 		self.pixels = bytearray(pixels * 3 + 1)
 
@@ -46,6 +47,7 @@ class LEDStrip(object):
 	# @param {integer} color 	Integer that holds a 21-bit color value (MSB is always set to HIGH)
 	def setPixelColor(self, pixel, color):
 		if (pixel > self.numPixels()) or (pixel < 0): return
+		if self.debug: print "[setPixelColor:LEDStrip] set pixel ", pixel, " to color ", color
 
 		rgb = [hex(color >> i & 0xff) for i in (16,8,0)]
 		pixel_loc = pixel * 3
@@ -61,6 +63,7 @@ class LEDStrip(object):
 	# @param {integer} green 	Integer that holds a 7-bit green color value 
 	# @param {integer} blue 	Integer that holds a 7-bit blue color value 
 	def setPixelColorRGB(self, pixel, red, green, blue):
+		if self.debug: print "[setPixelColorRGB:LEDStrip] set pixel ", pixel, " to r ", red, " g ", green, " b ", blue
 		self.setPixelColor(pixel, self.color(red, green, blue))
 
 	##
@@ -70,7 +73,8 @@ class LEDStrip(object):
 	# @param {integer} blue 	Integer that holds a 7-bit blue color value 
 	# @returns {integer}		Integer that holds a 21-bit color value (MSB is always set to HIGH)
 	def color(self, red, green, blue):
-        new_color = int((0x80 | red << 16) | (0x80 | green << 8) | (0x80 | blue))
+		if self.debug: print "[color:LEDStrip] get 21-bit color - r ", red, " g ", green, " b ", blue
+		new_color = int((0x80 | red << 16) | (0x80 | green << 8) | (0x80 | blue))
 		return new_color
 
 	##
@@ -81,6 +85,7 @@ class LEDStrip(object):
 	# 							(MSB is always set to HIGH)
 	def getPixelColor(self, pixel):
 		if (pixel > self.numPixels()) or (pixel < 0): return
+		if self.debug: print "[getPixelColor:LEDStrip] get color from pixel ", pixel
 
 		pixel_loc = pixel * 3
 		return self.color(self.pixels[pixel_loc], self.pixels[pixel_loc + 1], self.pixels[pixel_loc + 2])
@@ -92,6 +97,7 @@ class LEDStrip(object):
 	# @returns {array}			Array that holds 7-bit RGB color values
 	def getPixelColorRGB(self, pixel):
 		if (pixel > self.numPixels()) or (pixel < 0): return
+		if self.debug: print "[getPixelColorRGB:LEDStrip] get RGB color from pixel ", pixel
 
 		pixel_loc = pixel * 3
 		return [self.pixels[pixel_loc], self.pixels[pixel_loc + 1], self.pixels[pixel_loc + 2]]
@@ -99,6 +105,7 @@ class LEDStrip(object):
 	##
 	# numPixels 	Returns the length in pixels of the LED strip
 	def numPixels(self):
+		if self.debug: print "[numPixels:LEDPixels] get pixel count ", ( (len(self.pixels) - 1) / 3 )
 		return ( (len(self.pixels) - 1) / 3 )
 
 	##
@@ -107,6 +114,7 @@ class LEDStrip(object):
 		if self.spi:
 			self.spi.write(self.pixels)
 			self.spi.flush()
+			if self.debug: print '[show:LEDStrip] update leds'
 		else:
 			print '[show:LEDStrip] ERROR unable to update leds'
 

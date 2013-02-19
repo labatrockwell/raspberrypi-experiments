@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(description='Example sketch that controls an LE
 # Define the server optional parameter
 parser.add_argument('-s', '--server', 
 					nargs=1, type=str, 
-					default='sandbox.spacesb.cc',
+					default='sandbox.spacebrew.cc',
 					help='the spacesb server hostname')
 
 # Define the leds strip length optional parameter
@@ -31,12 +31,13 @@ parser.add_argument('-l', '--leds', '--pixels',
 args = parser.parse_args()
 
 # initialize variables
-brightness  = 0.0 				# current brightness state (used to determine how many leds should be on)
+brightness  	= 0.0 				# current brightness state (used to determine how many leds should be on)
 color 		= [127, 127, 127]	# RGB color used for all pixels
 rangeMax	= 1023.0 			# maximum incoming range values
 pixels		= args.leds			# number of pixels 
 spidev		= file("/dev/spidev0.0", "wb")  # link to spi connection to the led bar
-led 		= {}
+leds 		= {}
+sb		= {}
 
 def map(value, sourceMin, sourceMax, targetMin, targetMax):
 	sourceSpan = sourceMax - sourceMin
@@ -46,16 +47,15 @@ def map(value, sourceMin, sourceMax, targetMin, targetMax):
 	return int(updatedVal)
 
 def updateStrip():
-	global brightness
-	global color
+	global brightness, color, rangeMax, pixels, leds
+	cur_bright = (brightness / rangeMax * pixels)
 	for i in range(32):
-		if i < ( brightness / rangeMax * pixels ): 
+		if i < cur_bright: 
 			leds.setPixelColorRGB(pixel=i, red=color[0], green=color[1], blue=color[2])
 		else:
 			leds.setPixelColorRGB(pixel=i, red=128, green=128, blue=128)
-
 	leds.show()
-	time.sleep(0.001)
+	#time.sleep(0.001)
 
 def updateLight(bright):
 	global brightness
@@ -78,11 +78,13 @@ def updateBlue(blue):
 	updateStrip()
 
 def main():
+	global leds, sb
+
 	# create an instance of LEDStrip object - pass number of pixels and link to spi connection
 	leds = ledstrip.LEDStrip(pixels=pixels, spi=spidev)
 
 	# set spacesb name and create spacesb object
-	sbName = ("Pithon DATA BAR " + str(random.randint(0,2000)))
+	sbName = ("Data Bar " + str(random.randint(0,2000)))
 	sb = spacebrew.SpaceBrew(sbName, server=args.server)
 
 	# register all of the subscription channels
@@ -99,7 +101,8 @@ def main():
 
 	# connect to spacesb
 	sb.start() 
-	print "App is running and conected to Spacsb name is ", sbName
+
+	print "App is running and conected to Spacebrew name is ", sbName
 
 if __name__ == "__main__":
 	main()

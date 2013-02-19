@@ -78,26 +78,3 @@ def main():
 if __name__ == "__main__":
 	main()
 
-
-# Initialise the PWM device using the default address
-# bmp = PWM(0x40, debug=True)
-# pwm = PWM(0x40, debug=True)
-
-# pwm.setPWMFreq(250)												# Set frequency to 60 Hz
-# inter = 12
-# pos_1 = 1024
-# pos_2 = 2048
-# cur_actuator = 0
-# move_to = pos_2
-
-# while (True):
-# 	# Change speed of continuous servo on channel O
-# 	print "moving ", cur_actuator, " to ", move_to
-# 	pwm.setPWM(cur_actuator, 0, move_to)
-# 	time.sleep(inter)
-# 	cur_actuator += 1
-# 	cur_actuator %= 5
-# 	if cur_actuator == 0:
-# 		if move_to == pos_2: move_to = pos_1
-# 		else: move_to = pos_2
-
