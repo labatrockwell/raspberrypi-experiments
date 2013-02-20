@@ -1,7 +1,7 @@
 # LED Strip
 # ---------
 # 
-# library that controls the LED strips from Adafruit using the 
+# library that controls the LED strips (LPD8806) from Adafruit using the 
 # SPI bus on a Raspberry Pi.
 # 
 # The protocol for sending information to the light requires that we 
@@ -11,6 +11,10 @@
 # The LED strip is updated only when the show method is called. The 
 # setPixelColor method updates the byte array that holds the state of 
 # each led.
+# 
+# @author    Julio Terra (LAB at Rockwell Group)
+# @filename  ledstrip.py
+# @version   0.0.2
 # 
 
 class LEDStrip(object):
@@ -23,7 +27,8 @@ class LEDStrip(object):
 
 		self.debug = debug
 		self.pixels = bytearray(pixels * 3 + 1)
-		self.pixels[self.numPixels()] = 0x80
+		for pixel in self.pixels: pixel = 0x80
+		self.pixels[self.numPixels()] = 0x00
 		self.spi = spi
 
 		if self.spi: print '[__init__:LEDStrip] LED Strip successuflly initialized.'
@@ -74,7 +79,7 @@ class LEDStrip(object):
 	# @returns {integer}		Integer that holds a 21-bit color value (MSB is always set to HIGH)
 	def color(self, red, green, blue):
 		if self.debug: print "[color:LEDStrip] get 21-bit color - r ", red, " g ", green, " b ", blue
-		new_color = int((0x80 | red << 16) | (0x80 | green << 8) | (0x80 | blue))
+		new_color = int(((0x80 | red) << 16) | ((0x80 | green) << 8) | (0x80 | blue))
 		return new_color
 
 	##

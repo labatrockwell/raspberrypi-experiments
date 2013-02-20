@@ -1,6 +1,6 @@
 #!/usr/bin/python
  
-# SPACEBREW BAR :: EXAMPLE SKETCH
+# SPACEBREW BAR GRAPH :: EXAMPLE SKETCH
 # Example sketch for Raspberry Pi that controls an LED strip via Spacesb. 
 # It uses the LED Strip Python library for Adafruit's LPD8806 LED strips. 
 # 
@@ -8,7 +8,6 @@
 
 from spacebrewInterface import spacebrew 
 from ledStrip import ledstrip
-import RPi.GPIO as GPIO
 import time
 import random 
 import argparse
@@ -31,14 +30,16 @@ parser.add_argument('-l', '--leds', '--pixels',
 args = parser.parse_args()
 
 # initialize variables
-brightness  	= 0.0 				# current brightness state (used to determine how many leds should be on)
+spidev		= file("/dev/spidev0.0", "wb")  # ref to spi connection to the led bar
+leds 		= {}							# ref to the LEDStrip object
+sb			= {}							# ref to spacebrew object
+
+brightness  = 0.0 				# current brightness state (used to determine how many leds should be on)
 color 		= [127, 127, 127]	# RGB color used for all pixels
 rangeMax	= 1023.0 			# maximum incoming range values
 pixels		= args.leds			# number of pixels 
-spidev		= file("/dev/spidev0.0", "wb")  # link to spi connection to the led bar
-leds 		= {}
-sb		= {}
 
+# function that maps value to a new range
 def map(value, sourceMin, sourceMax, targetMin, targetMax):
 	sourceSpan = sourceMax - sourceMin
 	targetSpan = targetMax - targetMin
@@ -46,6 +47,7 @@ def map(value, sourceMin, sourceMax, targetMin, targetMax):
 	updatedVal = targetMin + (valueScaled * targetSpan)
 	return int(updatedVal)
 
+# function that updates led strip
 def updateStrip():
 	global brightness, color, rangeMax, pixels, leds
 	cur_bright = (brightness / rangeMax * pixels)
@@ -55,29 +57,34 @@ def updateStrip():
 		else:
 			leds.setPixelColorRGB(pixel=i, red=128, green=128, blue=128)
 	leds.show()
-	#time.sleep(0.001)
 
+# handles data from "light" spacebrew channel
 def updateLight(bright):
 	global brightness
 	brightness = bright
 	updateStrip()
 
+# updates color when data received from "red" spacebrew channel
 def updateRed(red):
 	global color
 	color[0] = map(red, 0, rangeMax, 0, 127) + 128
 	updateStrip()
 
+# updates color when data received from "green" spacebrew channel
 def updateGreen(green):
 	global color
 	color[1] = map(green, 0, rangeMax, 0, 127) + 128
 	updateStrip()
 
+# updates color when data received from "blue" spacebrew channel
 def updateBlue(blue):
 	global color
 	color[2] = map(blue, 0, rangeMax, 0, 127) + 128
 	updateStrip()
 
+# function that initializes all spacebrew and led strip object when script is run
 def main():
+	# identify global variables that we will access in this function
 	global leds, sb
 
 	# create an instance of LEDStrip object - pass number of pixels and link to spi connection
@@ -89,7 +96,7 @@ def main():
 
 	# register all of the subscription channels
 	sb.addSubscriber("light", "range")
-        sb.addSubscriber("color_red", "range")
+	sb.addSubscriber("color_red", "range")
 	sb.addSubscriber("color_green", "range")
 	sb.addSubscriber("color_blue", "range")
 

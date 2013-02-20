@@ -4,24 +4,26 @@ LAB LED Strip Library
 This python library was created to drive the LED Strips from Adafruit with 32 pixels per meter using the Raspberry Pi (this LED strip uses LPD8806 LED drivers). We structured this library to mimic Adafruit's existing Arduino library, so that it would be easy for anyone to get up and running with it quickly. 
 
 In order to use this library with your Raspberry Pi we recommend that you install Adafruit's Linux distribution, called Occidentalis. This flavor of Linux includes that drivers and configurations you need to use the hardware SPI on your Raspberry Pi - if you are using the standard Linux distribution you will have to get hardware SPI working first.
-
-LED Strip Production Page on Adafruit - http://adafruit.com/products/306  
-LED Strip Tutorial and Arduino Library on Adafruit - http://learn.adafruit.com/digital-led-strip/
-
-@author 	Julio Terra at the LAB at Rockwell Group  
-@credits 	Based on Library foundation created by Adafruit  
-@date		February 11, 2013  
-@version 	0.0.1
+  
+References:    
+* LED Strip Product Page on Adafruit - http://adafruit.com/products/306    
+* LED Strip Tutorial and Arduino Library on Adafruit - http://learn.adafruit.com/digital-led-strip/  
+  
+@author     Julio Terra at the LAB at Rockwell Group  
+@credits    Based on Library foundation created by Adafruit  
+@date       February 19, 2013    
+@version    0.0.2  
 
 Library Documentation
 =====================
 
-###__init__(self, pixels = 32, spi = None)
+###__init__(self, pixels = 32, spi = None, debug = False)
 Constructor for the LED Strip Library that initializes the `self.pixels` byte array, which holds the current state of each RGB led, and assigns the `self.spi` variable a reference to the spi connection. The `self.pixels` array holds three bytes for each led, and an extra latch byte.
 
 Parameters:
 * `pixels`: integer : length of the strip in pixels
 * `spi`: object : spi connection reference
+* `debug`: boolean : turns on info/debug messages
 
 ###updateLength(self, pixels)
 Updates the length of the LED strip.
