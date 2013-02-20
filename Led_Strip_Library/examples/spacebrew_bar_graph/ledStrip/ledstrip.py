@@ -28,7 +28,7 @@ class LEDStrip(object):
 		self.debug = debug
 		self.pixels = bytearray(pixels * 3 + 1)
 		for pixel in self.pixels: pixel = 0x80
-		self.pixels[self.numPixels()] = 0x00
+		self.pixels[(len(self.pixels)-1)] = 0x00
 		self.spi = spi
 
 		if self.spi: print '[__init__:LEDStrip] LED Strip successuflly initialized.'
