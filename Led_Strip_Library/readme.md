@@ -14,6 +14,15 @@ References:
 @date       February 19, 2013    
 @version    0.0.2  
 
+Example Sketches
+================
+
+###Simple Example
+Sketch that plays a chase animation on the LED strip.
+
+###Spacebrew Bar Graph
+Sketch that enables you to control an LED strip via Spacebrew. It registers four range subscription channels: one for each RGB color, and the last one to control the number of leds that are turned on.
+
 Library Documentation
 =====================
 
