@@ -8,6 +8,7 @@ In order to use this library with your Raspberry Pi we recommend that you instal
 References:    
 * LED Strip Product Page on Adafruit - http://adafruit.com/products/306    
 * LED Strip Tutorial and Arduino Library on Adafruit - http://learn.adafruit.com/digital-led-strip/  
+* Reference for Hooking-up LED Strips to RPi - http://learn.adafruit.com/light-painting-with-raspberry-pi/hardware
   
 @author     Julio Terra at the LAB at Rockwell Group  
 @credits    Based on Library foundation created by Adafruit  
